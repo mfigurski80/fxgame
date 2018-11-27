@@ -3,6 +3,7 @@ import urllib.request, json, datetime
 
 # UTILITY FUNCTIONS
 def getJSONFrom(urlToGet):
+    print("\t[getting from '" + urlToGet + "']")
     with urllib.request.urlopen(urlToGet) as response:
         data = json.loads(response.read().decode())
         return data
@@ -27,7 +28,8 @@ def getFXData(url, key):
 
 # HARD SETTINGS
 save_file_name = "save.json"
-access_key = "bdf49805e3ef4e4fac1cf6251f5eae5c"
+access_keys = ["bdf49805e3ef4e4fac1cf6251f5eae5c", "cc7a55586c597a9c83f7da90b76f9825"]
+# access_key = "bdf49805e3ef4e4fac1cf6251f5eae5c"
 url = "http://data.fixer.io/api/latest"
 
 # Soft Settings (updateable)
@@ -36,7 +38,7 @@ state = {
     "savedCur": {},
     "inventory": {"EUR":100},
     "rates": {},
-    "ratesLastUpdated": 0
+    "ratesLastUpdated": 0,
 }
 
 
@@ -74,7 +76,7 @@ def setName(nameInArray):
 def viewInventory():
     totalValue = 0
     for i in state["inventory"].keys():
-        print(state["inventory"][i],"of",i)
+        print(i,": amount",state["inventory"][i])
         totalValue += state["inventory"][i] / state["rates"][0]["rt"][i]
     print("\tTotal Value: " + str(totalValue))
 
@@ -91,9 +93,12 @@ def printRates(args = []):
             print(rt, ":", state["rates"][0]["rt"][rt])
     print("\tUpdated on " + timestampToDate(state["rates"][0]["timestamp"]))
 
-def getRates():
+def getRates(which_key = 0):
     global state
-    data = getFXData(url, access_key)
+    data = getFXData(url, access_keys[which_key])
+    if data["success"] == False: # if not successful, try next key
+        print("\t[rate retrieval was unsuccessful.]")
+        getRates(which_key = which_key+1)
     state["rates"].insert(0,{"rt":data["rates"],"timestamp": data["timestamp"]})
     print("\t[successfully retrieved current rates]")
     if len(state["rates"]) > 5: # make sure list doesn't go over 5

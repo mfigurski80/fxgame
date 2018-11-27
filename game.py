@@ -1,4 +1,4 @@
-import urllib.request, json
+import urllib.request, json, datetime
 
 
 # UTILITY FUNCTIONS
@@ -16,6 +16,8 @@ def FileToJSON(filename):
             return data
     except:
         return None
+def timestampToDate(stamp):
+    return datetime.datetime.fromtimestamp(stamp).isoformat()
 
 def getFXData(url, key):
     return getJSONFrom(url + "?access_key=" + key)
@@ -41,9 +43,16 @@ state = {
 
 
 # Executeable functions...
+def help():
+    print("\t" + state["username"])
+    print("\tcommands currently available: ")
+    print(commands.keys())
+
 def quit():
     global isExit
+    save()
     isExit = True
+    print("\t[exiting...]")
 
 def save():
     JSONToFile(state, save_file_name)
@@ -56,25 +65,85 @@ def load(filename = save_file_name):
         state = data
         print("\t[load successful]")
     else:
-        print("\t[load not successful]")
+        print("\t[load not successful. It's possible you do not have a save file yet]")
 
 def setName(nameInArray):
     global state
     state["username"] = " ".join(nameInArray)
 
-def printRates():
-    for i in state["rates"].keys():
-        print(i, ":", state["rates"][i])
+def viewInventory():
+    totalValue = 0
+    for i in state["inventory"].keys():
+        print(state["inventory"][i],"of",i)
+        totalValue += state["inventory"][i] / state["rates"][0]["rt"][i]
+    print("\tTotal Value: " + str(totalValue))
+
+def printRates(args = []):
+    if len(state["rates"]) == 0:
+        print("\t[no rates found]")
+        return
+
+    if len(args) == 0:
+        for i in state["rates"][0]["rt"].keys(): # use latest rates
+            print(i, ":", state["rates"][0]["rt"][i])
+    else:
+        for rt in args:
+            print(rt, ":", state["rates"][0]["rt"][rt])
+    print("\tUpdated on " + timestampToDate(state["rates"][0]["timestamp"]))
+
+def getRates():
+    global state
+    data = getFXData(url, access_key)
+    state["rates"].insert(0,{"rt":data["rates"],"timestamp": data["timestamp"]})
+    print("\t[successfully retrieved current rates]")
+    if len(state["rates"]) > 5: # make sure list doesn't go over 5
+        state["rates"].pop()
+
+def buy(args):
+    global state
+    name = args[0]
+    amount = int(args[1])
+
+    rate = state["rates"][0]["rt"][name]
+    cost = amount / rate
+    if cost > state["inventory"]["EUR"]:
+        print("[not enough EUR to complete purchase]")
+        return
+    state["inventory"]["EUR"] -= cost
+    if name in state["inventory"].keys():
+        state["inventory"][name] += amount
+    else:
+        state["inventory"][name] = amount
+    print("[transaction complete. Payed " + str(cost) + " EUR]")
+
+def sell(args):
+    global state
+    name = args[0]
+    amount = int(args[1])
+
+    rate = state["rates"][0]["rt"][name]
+    cost = amount / rate
+    state["inventory"]["EUR"] += cost
+    state["inventory"][name] -= amount
+    if state["inventory"][name] == 0: # if no more of asset
+        del state["inventory"][name]
+    print("[transaction complete. Earned " + str(cost) + " EUR]")
+
 
 # list of typeable commands
 commands = {
+    "help": help,
     "q": quit,
     "quit": quit,
     "exit": quit,
     "save": save,
     "load": load,
     "setName": setName,
+    "assets": viewInventory,
     "rates": printRates,
+    "getRates": getRates,
+    "buy": buy,
+    "sell": sell
 }
 
 

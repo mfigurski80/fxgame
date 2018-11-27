@@ -112,14 +112,14 @@ def buy(args):
     rate = state["rates"][0]["rt"][name]
     cost = amount / rate
     if cost > state["inventory"]["EUR"]:
-        print("[not enough EUR to complete purchase]")
+        print("\t[not enough EUR to complete purchase]")
         return
     state["inventory"]["EUR"] -= cost
     if name in state["inventory"].keys():
         state["inventory"][name] += amount
     else:
         state["inventory"][name] = amount
-    print("[transaction complete. Payed " + str(cost) + " EUR]")
+    print("\t[transaction complete. Payed " + str(cost) + " EUR]")
 
 def sell(args):
     global state
@@ -132,7 +132,21 @@ def sell(args):
     state["inventory"][name] -= amount
     if state["inventory"][name] == 0: # if no more of asset
         del state["inventory"][name]
-    print("[transaction complete. Earned " + str(cost) + " EUR]")
+    print("\t[transaction complete. Earned " + str(cost) + " EUR]")
+
+def analyze(args):
+    for name in args:
+        name = args[0]
+        print("\n" + name)
+
+        currentRate = state["rates"][0]["rt"][name]
+
+        past_rates = {}
+        for past_rate in state["rates"]:
+            past_rates[timestampToDate(past_rate["timestamp"])] = past_rate["rt"][name]
+
+        for date in past_rates.keys():
+            print(date, ":", past_rates[date],":",  past_rates[date] - currentRate)
 
 
 # list of typeable commands
@@ -148,7 +162,8 @@ commands = {
     "rates": printRates,
     "getRates": getRates,
     "buy": buy,
-    "sell": sell
+    "sell": sell,
+    "analyze": analyze
 }
 
 

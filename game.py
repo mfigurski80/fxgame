@@ -155,7 +155,7 @@ def graph(args):
 
     # ** Setup **
     name = args[0]
-    print("\n** Graph of " + name + "/EUR **")
+    print("\n** Graph of " + name + "/EUR ** (how many " + name + " you can buy with 1 EUR)")
     # clean the datapoints
     rates = [time["rt"][name] for time in state["rates"]]
     times = [time["timestamp"] for time in state["rates"]]

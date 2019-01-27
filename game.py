@@ -148,6 +148,34 @@ def analyze(args):
         for date in past_rates.keys():
             print(date, ":", past_rates[date],":",  past_rates[date] - currentRate)
 
+def graph(args):
+    # Settings...
+    graph_height = 15
+    graph_width = 90
+
+    # ** Setup **
+    name = args[0]
+    print("\n** Graph of " + name + "/EUR **")
+    # clean the datapoints
+    rates = [time["rt"][name] for time in state["rates"]]
+    times = [time["timestamp"] for time in state["rates"]]
+    price_range = [min(rates), max(rates)]
+    d_price_range = price_range[1] - price_range[0]
+    time_range = [min(times), max(times)]
+    d_time_range = time_range[1] - time_range[0]
+    # setup graph
+    graph = [" "*(graph_width + 1) for i in range(graph_height+1)]
+    # print(graph)
+
+    for i in range(len(rates)): # for each rate...
+        xpos = int(((times[i] - time_range[0])/d_time_range) * graph_width)
+        ypos = graph_height - int(((rates[i] - price_range[0])/d_price_range) * graph_height)
+        graph[ypos] = graph[ypos][:xpos] + "O" + graph[ypos][xpos + 1:]
+        # print(xpos, ypos)
+
+    graph = " |\n".join(graph) + " |"
+    print(graph)
+
 
 # list of typeable commands
 commands = {
@@ -163,7 +191,8 @@ commands = {
     "getRates": getRates,
     "buy": buy,
     "sell": sell,
-    "analyze": analyze
+    "analyze": analyze,
+    "graph": graph
 }
 
 

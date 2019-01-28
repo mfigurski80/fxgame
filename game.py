@@ -101,7 +101,7 @@ def getRates(which_key = 0):
         getRates(which_key = which_key+1)
     state["rates"].insert(0,{"rt":data["rates"],"timestamp": data["timestamp"]})
     print("\t[successfully retrieved current rates]")
-    if len(state["rates"]) > 5: # make sure list doesn't go over 5
+    if len(state["rates"]) > 10: # make sure list doesn't go over 10
         state["rates"].pop()
 
 def buy(args):
@@ -112,8 +112,10 @@ def buy(args):
     rate = state["rates"][0]["rt"][name]
     cost = amount / rate
     if cost > state["inventory"]["EUR"]:
-        print("\t[not enough EUR to complete purchase]")
-        return
+        print("\t[execute at deficit? y/n]")
+        ans = input()
+        if ans == "n":
+            return
     state["inventory"]["EUR"] -= cost
     if name in state["inventory"].keys():
         state["inventory"][name] += amount
@@ -151,7 +153,7 @@ def analyze(args):
 def graph(args):
     # Settings...
     graph_height = 15
-    graph_width = 90
+    graph_width = 110
 
     # ** Setup **
     name = args[0]

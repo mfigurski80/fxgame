@@ -35,7 +35,6 @@ url = "http://data.fixer.io/api/latest"
 # Soft Settings (updateable)
 state = {
     "username": "unknown user",
-    "savedCur": {},
     "inventory": {"EUR":100},
     "rates": {},
     "ratesLastUpdated": 0,
@@ -157,7 +156,7 @@ def graph(args):
 
     # ** Setup **
     name = args[0]
-    print("\n** Graph of " + name + "/EUR ** (how many " + name + " you can buy with 1 EUR)")
+    print("\n** Graph of EUR/" + name + " ** (how many " + name + " you can buy with 1 EUR)")
     # clean the datapoints
     rates = [time["rt"][name] for time in state["rates"]]
     times = [time["timestamp"] for time in state["rates"]]
@@ -175,6 +174,7 @@ def graph(args):
         graph[ypos] = graph[ypos][:xpos] + "O" + graph[ypos][xpos + 1:]
         # print(xpos, ypos)
 
+    print("Price Change Percentage: " + str(d_price_range/price_range[0]))
     graph = " |\n".join(graph) + " |"
     print(graph)
 
@@ -199,7 +199,7 @@ commands = {
 
 
 load() # load right away
-print("Welcome back, " + state["username"])
+print("Read sim for user: " + state["username"])
 # controlling loop!!
 isExit = False
 while not isExit:

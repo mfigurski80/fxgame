@@ -100,7 +100,7 @@ def getRates(which_key = 0):
         getRates(which_key = which_key+1)
     state["rates"].insert(0,{"rt":data["rates"],"timestamp": data["timestamp"]})
     print("\t[successfully retrieved current rates]")
-    if len(state["rates"]) > 10: # make sure list doesn't go over 10
+    if len(state["rates"]) > 40: # make sure list doesn't go over 40
         state["rates"].pop()
 
 def buy(args):
@@ -152,7 +152,7 @@ def analyze(args):
 def graph(args):
     # Settings...
     graph_height = 15
-    graph_width = 110
+    graph_width = 100
 
     # ** Setup **
     name = args[0]
